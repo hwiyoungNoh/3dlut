@@ -16,7 +16,6 @@
 using namespace std;
 
 double **importArray;
-
 int lut_size = 33;
 
 int file_import(const char *fileName)
@@ -136,7 +135,8 @@ int main(void)
     {
         #include "oriGamutTable.h"
     };
-    lut_size = file_import("3dlsample1.3dl");
+    
+    lut_size = file_import("Paladin 1875.CUBE");
     if(lut_size <= 0)
     {
         cout << "Size error!" << endl;
@@ -246,7 +246,7 @@ int main(void)
     {
         #include "bypassTable.h"
     };
-    
+
     FILE* pp;
     FILE* fp;
     FILE* bp;
@@ -344,23 +344,23 @@ int main(void)
                 if(red == 0)
                 {
                     resArray[a][i] = tmpDouble[i] * ary1[red];
-                    resBypassArray[a][i] = tmpDouble[i] * ary1[red];
+                    resBypassArray[a][i] = bBase[i] * ary1[red];
                 }
                 if(green == 0)
                 {
                     resArray[a][i] = tmpDouble[i] * ary1[green];
-                    resBypassArray[a][i] = tmpDouble[i] * ary1[green];
+                    resBypassArray[a][i] = bBase[i] * ary1[green];
                 }
                 if(blue == 0)
                 {
                     resArray[a][i] = tmpDouble[i] * ary1[blue];
-                    resBypassArray[a][i] = tmpDouble[i] * ary1[blue];
+                    resBypassArray[a][i] = bBase[i] * ary1[blue];
                 }
             }
             else
             {
                 resArray[a][i] = (tmpDouble[i] * inputArray[0][a][i]) > 1.0f ? 1.0f : (tmpDouble[i] * inputArray[0][a][i]);
-                resBypassArray[a][i] = (tmpDouble[i] * bypassArray[0][a][i]) > 1.0f ? 1.0f : (tmpDouble[i] * inputArray[0][a][i]);
+                resBypassArray[a][i] = bBase[i];
             }
         }
 
