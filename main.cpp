@@ -17,7 +17,6 @@ using namespace std;
 
 double **importArray;
 int lut_size = 33;
-
 int file_import(const char *fileName)
 {
     ifstream ifile(fileName);
@@ -129,6 +128,54 @@ int file_import(const char *fileName)
     return size;
 }
 
+
+double **bypassStandardArray;
+short bypassShortArray[LUT_SIZE*LUT_SIZE*LUT_SIZE][3];
+int matrixToLUT(void)
+{
+    double matrixParam[3][3] = {
+        {0.6487, 0.3010, 0.0503},
+        {0.0526, 0.9750, -0.0276},
+        {0.0155, 0.0569, 0.9276},
+    };
+    bypassStandardArray = new double*[LUT_SIZE*LUT_SIZE*LUT_SIZE];
+    for(int i = 0; i<LUT_SIZE*LUT_SIZE*LUT_SIZE; i++)
+    {
+        bypassStandardArray[i] = new double[3];
+        
+        bypassStandardArray[i][0] = (double)(i % 17)/16.0f;
+        bypassStandardArray[i][1] = (double)((i/17)%17)/16.0f;
+        bypassStandardArray[i][2] = (double)((int)(i/(17*17))%17)/16.0f;
+
+        printf("[%4d] %1.5f %1.5f %1.5f\n",i,bypassStandardArray[i][0],bypassStandardArray[i][1],bypassStandardArray[i][2]);
+
+        bypassStandardArray[i][0] = matrixParam[0][0] * bypassStandardArray[i][0] + matrixParam[0][1] * bypassStandardArray[i][1] + matrixParam[0][2] * bypassStandardArray[i][2];
+        bypassStandardArray[i][1] = matrixParam[1][0] * bypassStandardArray[i][0] + matrixParam[1][1] * bypassStandardArray[i][1] + matrixParam[1][2] * bypassStandardArray[i][2];
+        bypassStandardArray[i][2] = matrixParam[2][0] * bypassStandardArray[i][0] + matrixParam[2][1] * bypassStandardArray[i][1] + matrixParam[2][2] * bypassStandardArray[i][2];
+
+        bypassShortArray[i][0] = (short)(bypassStandardArray[i][0] * 4095) > 4095 ? 4095 : ((short)(bypassStandardArray[i][0] * 4095) < 0 ? 0 : (short)(bypassStandardArray[i][0] * 4095));
+        bypassShortArray[i][1] = (short)(bypassStandardArray[i][1] * 4095) > 4095 ? 4095 : ((short)(bypassStandardArray[i][1] * 4095) < 0 ? 0 : (short)(bypassStandardArray[i][1] * 4095));
+        bypassShortArray[i][2] = (short)(bypassStandardArray[i][2] * 4095) > 4095 ? 4095 : ((short)(bypassStandardArray[i][2] * 4095) < 0 ? 0 : (short)(bypassStandardArray[i][2] * 4095));
+
+    }
+    
+    FILE* mp;
+    FILE* sp;
+    mp = fopen("matrix.txt","w+");
+    sp = fopen("smatrix.txt","w+");
+    for(int i = 0; i<LUT_SIZE*LUT_SIZE*LUT_SIZE; i++)
+    {
+        fprintf(mp,"%1.5f, %1.5f, %1.5f\n",bypassStandardArray[i][0],bypassStandardArray[i][1],bypassStandardArray[i][2]);
+        fprintf(sp,"%5d, %5d, %5d\n",bypassShortArray[i][0],bypassShortArray[i][1],bypassShortArray[i][2]);
+        free(bypassStandardArray[i]);
+    }
+    free(bypassStandardArray);
+    fclose(mp);
+    fclose(sp);
+
+    return 0;
+}
+
 int main(void)
 {
     double inputArray[][LUT_SIZE*LUT_SIZE*LUT_SIZE][3] =
@@ -136,6 +183,8 @@ int main(void)
         #include "oriGamutTable.h"
     };
     
+    matrixToLUT();
+
     lut_size = file_import("Paladin 1875.CUBE");
     if(lut_size <= 0)
     {
